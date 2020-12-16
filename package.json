@@ -9,9 +9,10 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "materialize-css": "^1.0.0-rc.2",
+    "materialize-css": "^1.0.0",
     "materialize-js": "^1.0.0",
     "vue": "^2.6.11",
+    "vue-route": "^1.5.1",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "vuex-persistedstate": "^2.5.4"

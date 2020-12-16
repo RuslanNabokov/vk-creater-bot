@@ -7,13 +7,11 @@
 </template>
 
 <script>
-
-const Main = {template:"<h1> <router-view /> </h1>"}
+import Main  from  '@/layouts/Main'
 export default {
   name: 'App',
   computed: {
     layout(){
-
       return this.$route.meta.layout
     }
   },
@@ -23,5 +21,8 @@ export default {
 }
 </script>
 
-<style>
+<style type="sass">
+@import "~materialize-css/dist/css/materialize.min.css";
+
+/* @import "assets/my.css"; */
 </style>
