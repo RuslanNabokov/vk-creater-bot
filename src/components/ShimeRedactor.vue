@@ -13,10 +13,8 @@
          v-on:mouseup="myDragStop()"
         >
         </div> -->
-        <Block
-         v-bind:card={id:1,left:left,top:top}
-
-        
+        <Block v-for="card in cards"  :key="card.id"
+         v-bind:card={...card}
          />
         </div>
     </div>
@@ -32,40 +30,60 @@ export default {
     dragged:-1,
     left:1,
     top:1,
+    cards:[
+        {id:1,color:'red',top:10,left:10,name:"block"},
+        {id:2,color:'grey',top:50,left:20,name:"block2"},
+        {id:3,color:'yellow',top:100,left:30,name:"block3"},
+
+    ]
     }),
     components:{Block},
     mounted(){
-
+        this.$on('drag', function (id,x,y) { 
+            this.dragged = id
+            this.clickX = x,
+            this.clickY = y
+         }), 
+        this.$on('stopdrag', function (id) { this.dragged = -1 }) 
+    },
+    computed:{
+   
     },
     methods:{
-        mouseMove(event){
-            //console.log(event.pageX)
- 
-            
+    get_position(id){
+            let searh_coord = document.getElementById(id+'')
+            let x = searh_coord.getBoundingClientRect().x
+            let y = searh_coord.getBoundingClientRect().y 
+            return {x:x,y:y}
         },
-        myDrag(event,id){
-            this.dragged=id;
-           
+        myDrag(id){
+            this.dragged=2;
+         
         },
-        moveAt(event){
-
-            
+        moveAt(event){           
 
         },
     mouseMove(event){
-            this.left =     event.pageX - 20 + 'px' ;
-            this.top  =  event.pageY  - 110  + 'px';
-            console.log(event.pageX )
-            
-         }
-           
-    //     },
-    //      myDragStop() {
-    //     // сбрасываем все значения к начальным
-    //     this.dragged= -1;
+            if(this.dragged == -1){ return}
+            let active = this.cards[this.cards.findIndex( card => card.id === this.dragged ) ]
+            active.left =  event.clientX - this.clickX  +  'px' ;
+            active.top  =  event.clientY - this.clickY  + document.documentElement.scrollTop   - 80    + 'px';
+            let na_odn_osi_x = this.cards.find( card => card.id !== this.dragged && ((parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 2    )  ||(parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > -2   )   )    )
+            let na_odn_osi_y = this.cards.find( card => card.id !== this.dragged && ((parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > 2    )  ||(parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > -2   )   )    )
+            if (na_odn_osi_x.length != 0){
+                if (active.top >  parseInt(na_odn_osi_x.top)){
 
-    //     console.log('drag')
-    //     },
+                }
+            }
+        },
+           
+
+    myDragStop(id) {
+        if (this.dragged == id){
+       // this.dragged= -1
+        console.log('s')
+        }else{}
+        },
     //     isDragging() {
     //     return this.dragged != -1;
     // },

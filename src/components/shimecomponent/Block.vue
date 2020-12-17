@@ -1,19 +1,17 @@
 <template>
-    <div   @mousedown="myDrag($event)"  
-    v-on:mouseup="myDragStop()"
-   
-    class="block-shime row card sticky-action" 
-    v-bind:style="{position:position,left:card.left,top:card.top}">
-         
-       
-        <div class="block-head col s12"  > 
+    <div   
+    
+    v-bind:id = "card.id"
+    class="block-shime  card sticky-action" style="display:inline-block"
+    v-bind:style="{position:position,left:card.left,top:card.top,margin:margin,}">
+        <div class="block-head " v-bind:style="{backgroundColor:card.color}"   @mousedown="myDrag($event)"  v-on:mouseup="myDragStop()"   > 
        <h6> {{card.name}} </h6>
         <a  v-on:click.stop.prevent="clickToButtonShowTools"  style="position:absolute;left: 85%;top:0%;"  class="btn-floating btn-small scale-transition"><i class=" material-icons">add</i></a>
        <div id="scale-demo" ref="navigate"  >
            <ul class="ul-menu">
 
         <li v-for="button in menuButtons">
-            <a class="btn-floating btn-menu"  v-bind:class="button.color"  v-bind:key="button.color" >
+            <a class="btn-floating btn-menu"   v-bind:class="button.color"  v-bind:key="button.color" >
                 <i class="material-icons">{{button.text}}</i></a></li>
            </ul>
             <!-- <ul>
@@ -24,7 +22,7 @@
             </ul> -->
         </div>
         </div>
-        <div class="block-body col s12 row" v-bind:style="{backgroundColor:card.color}"  >
+        <div class="block-body "   >
         </div>
     </div>
  
@@ -41,10 +39,10 @@ export default {
                 id: 0,
                 name: 'block-shime',
                 color: 'grey',
-                openMenu: false,
                 menu:-1,
                 left:0,
                 top:0,
+                
                 }
             }
             },
@@ -56,18 +54,15 @@ export default {
             {'text':'format_quote',"color":'yellow'},      
             {'text':'publish',"color":'green'},      
         ],
-        dragged:0,
-        position:"relative",
-  
-       
-
-
+        position:'relative',
+        margin:"0px",
     }),
     mounted(){
             let elem = this.$refs.navigate
             this.menu = M.FloatingActionButton.init(elem,{hoverEnabled: false});
             this.menu.isOpen= true
             this.menu.close()
+            this.color = this.color ? this.color : "grey"
             
     },
 
@@ -84,17 +79,20 @@ export default {
                 }
               
             },
-    myDrag(event){
-            this.dragged = 1
-            this.position='absolute'
-          
-        },
-    myDragStop(){
-        this.dragged =0
-        this.position='relative'
-          this.card.left = this.card.left
-            this.card.top = this.card.top
-    },
+            myDrag(event){
+             //   this.$parent.$options.methods.myDrag(this.card.id);
+             this.$parent.$emit('drag', this.card.id,event.offsetX, event.offsetY);
+             this.position = 'absolute'
+             this.margin= "0px"
+             console.log(event)
+            },
+            myDragStop(event){
+             //    this.$parent.$options.methods.myDragStop(this.card.id);
+             this.$parent.$emit('stopdrag', this.card.id);
+             this.position = 'absolute'
+             this.margin= "0px"
+             
+            }
 
 
     }
