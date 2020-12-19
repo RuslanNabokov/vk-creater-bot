@@ -72,7 +72,7 @@ export default {
             let na_odn_osi_y = this.cards.find( card => card.id !== this.dragged && ((parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > 2    )  ||(parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > -2   )   )    )
             if (na_odn_osi_x.length != 0){
                 if (active.top >  parseInt(na_odn_osi_x.top)){
-
+                    
                 }
             }
         },
