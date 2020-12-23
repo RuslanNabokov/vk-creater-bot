@@ -1,10 +1,10 @@
 <template>
     <div   
-    
+     @mousedown="myDrag($event)"  v-on:mouseup="myDragStop()"
     v-bind:id = "card.id"
-    class="block-shime  card sticky-action" style="display:inline-block"
+    class="block-shime  card sticky-action row" style="display:relative"
     v-bind:style="{position:position,left:card.left,top:card.top,margin:margin,}">
-        <div class="block-head " v-bind:style="{backgroundColor:card.color}"   @mousedown="myDrag($event)"  v-on:mouseup="myDragStop()"   > 
+        <div class="block-head col s12 " v-bind:style="{backgroundColor:card.color}"     > 
        <h6> {{card.name}} </h6>
         <a  v-on:click.stop.prevent="clickToButtonShowTools"  style="position:absolute;left: 85%;top:0%;"  class="btn-floating btn-small scale-transition"><i class=" material-icons">add</i></a>
        <div id="scale-demo" ref="navigate"  >
@@ -42,6 +42,7 @@ export default {
                 menu:-1,
                 left:0,
                 top:0,
+                width:'1px',
                 
                 }
             }
@@ -81,16 +82,19 @@ export default {
             },
             myDrag(event){
              //   this.$parent.$options.methods.myDrag(this.card.id);
-             this.$parent.$emit('drag', this.card.id,event.offsetX, event.offsetY);
+             if (event.offsetY > 37){return}
              this.position = 'absolute'
-             this.margin= "0px"
+
+             this.$parent.$emit('drag', this.card.id,event.offsetX, event.offsetY);
+             
+             
              console.log(event)
             },
             myDragStop(event){
              //    this.$parent.$options.methods.myDragStop(this.card.id);
              this.$parent.$emit('stopdrag', this.card.id);
              this.position = 'absolute'
-             this.margin= "0px"
+             
              
             }
 
@@ -120,6 +124,8 @@ export default {
     text-align: center;
     border-bottom: 1px solid blue-grey ;
     color: rgba(126, 160, 167, 0.7);
+    margin:  0px;
+    padding: 0px;
     }
 .block-body{
     height: 100%;

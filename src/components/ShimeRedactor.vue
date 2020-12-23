@@ -16,6 +16,17 @@
         <Block v-for="card in cards"  :key="card.id"
          v-bind:card={...card}
          />
+         <component v-bind:is="linecurrentX" 
+         v-bind:height="lineHeightX" 
+         v-bind:top="lineTopX"
+         v-bind:left="lineLeftX"
+         width:='15px'
+         ></component>
+        <component v-bind:is="linecurrentY" 
+         v-bind:top="lineTopY"
+         v-bind:left="lineLeftY"
+         v-bind:width="lineWidthY"
+         ></component>
         </div>
     </div>
 
@@ -23,13 +34,26 @@
 </template>
 
 <script>
+
+
+
 import Block from  '@/components/shimecomponent/Block'
+import Linetoblock from  '@/components/shimecomponent/Line'
 export default {
     name:'ShimeRedactor',
     data:() => ({
     dragged:-1,
     left:1,
     top:1,
+    lineHeightX:"200px",
+    lineTopX:"200px",
+    lineLeftX:"200px",
+    lineWidthY:"200px",
+    lineTopY:"200px",
+    lineLeftY:"200px",
+
+    linecurrentX:'Linetoblock',
+    linecurrentY:'Linetoblock',
     cards:[
         {id:1,color:'red',top:10,left:10,name:"block"},
         {id:2,color:'grey',top:50,left:20,name:"block2"},
@@ -37,12 +61,13 @@ export default {
 
     ]
     }),
-    components:{Block},
+    components:{Block,Linetoblock},
     mounted(){
         this.$on('drag', function (id,x,y) { 
             this.dragged = id
             this.clickX = x,
             this.clickY = y
+            
          }), 
         this.$on('stopdrag', function (id) { this.dragged = -1 }) 
     },
@@ -53,11 +78,17 @@ export default {
     get_position(id){
             let searh_coord = document.getElementById(id+'')
             let x = searh_coord.getBoundingClientRect().x
-            let y = searh_coord.getBoundingClientRect().y 
-            return {x:x,y:y}
+            let y = searh_coord.getBoundingClientRect().y
+            return {x:x,y:y,left:x,top:y}
         },
-        myDrag(id){
-            this.dragged=2;
+    get_size(id){
+         let searh_coord = document.getElementById(id+'')
+          let width = searh_coord.getBoundingClientRect().width
+        let height = searh_coord.getBoundingClientRect().height
+        return {width:width,height:height}
+    },
+        myDrag(){
+            
          
         },
         moveAt(event){           
@@ -66,14 +97,38 @@ export default {
     mouseMove(event){
             if(this.dragged == -1){ return}
             let active = this.cards[this.cards.findIndex( card => card.id === this.dragged ) ]
-            active.left =  event.clientX - this.clickX  +  'px' ;
-            active.top  =  event.clientY - this.clickY  + document.documentElement.scrollTop   - 80    + 'px';
-            let na_odn_osi_x = this.cards.find( card => card.id !== this.dragged && ((parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 2    )  ||(parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > -2   )   )    )
-            let na_odn_osi_y = this.cards.find( card => card.id !== this.dragged && ((parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > 2    )  ||(parseInt(this.get_position(card.id).y ) -  parseInt(active.left) > -2   )   )    )
-            if (na_odn_osi_x.length != 0){
-                if (active.top >  parseInt(na_odn_osi_x.top)){
+            active.left =  parseInt(event.clientX) - parseInt(this.clickX)  - 10   +  'px' ;
+            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop)  - 70    + 'px';
+            let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged && (
+            (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > -5 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 5)  
+            ||
+            (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -5 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 5)  )    )
+            let na_odn_osi_y = this.cards.filter( card => card.id !== this.dragged &&
+            (parseInt(this.get_position(card.id).y ) -  parseInt(active.top) > -5 && parseInt(this.get_position(card.id).y ) -  parseInt(active.top) < 5)  
+            ||
+            (parseInt(this.get_position(card.id).y ) -  parseInt(active.top) < 5 && parseInt(this.get_position(card.id).y ) -  parseInt(active.top) > -5)  )   
+           
+            if (na_odn_osi_x.length){
+                console.log(na_odn_osi_x.length)
+                let all_array = na_odn_osi_x.slice()
+                all_array.push(active)
+                let sort_x =  all_array.sort((a,b)=>{ parseInt(a.top) - parseInt(b.top)  })
+                this.lineTopX = sort_x[0].top
+                this.lineLeftX = active.left
+                this.lineHeightX =   ( parseInt(na_odn_osi_x.slice(-1)[0].top) - parseInt(parseInt(na_odn_osi_x[0].top) ) ) + (this.get_size( na_odn_osi_x.slice(-1)[0].id  ).height / 2  + this.get_size(na_odn_osi_x[0].id).height / 2   )  + 'px'
+                
+
+                
+                // let position)
+                // let os_start_x = parseInt(active.top) >  parseInt( this.get_position(na_odn_osi_x.id).y)   ?  parseInt(active.left) + 60 + 'px'
+                // if (){
                     
-                }
+                //        this.lineLeft = parseInt(active.left) + 60 + 'px'
+                //        this.lineTop =parseInt(this.get_position(na_odn_osi_x.id).y) + 'px'
+                       
+                //        this.lineHeight = ( parseInt(active.top) - parseInt(this.get_position(na_odn_osi_x.id).y) ) + (this.get_size(active.id).height / 2  + this.get_size(na_odn_osi_x.id).height / 2   )  + 'px'
+                //        this.linecurrent = 'Linetoblock'
+                //        }
             }
         },
            
@@ -81,7 +136,7 @@ export default {
     myDragStop(id) {
         if (this.dragged == id){
        // this.dragged= -1
-        console.log('s')
+        
         }else{}
         },
     //     isDragging() {
