@@ -3,7 +3,13 @@
      @mousedown="myDrag($event)"  v-on:mouseup="myDragStop()"
     v-bind:id = "card.id"
     class="block-shime  card sticky-action row" style="display:relative"
-    v-bind:style="{position:position,left:card.left,top:card.top,margin:margin,}">
+    v-bind:style="{position:position,
+    left:card.left,
+    top:card.top,
+    margin:card.margin,
+    height:card.height,
+    width:card.width
+    }">
         <div class="block-head col s12 " v-bind:style="{backgroundColor:card.color}"     > 
        <h6> {{card.name}} </h6>
         <a  v-on:click.stop.prevent="clickToButtonShowTools"  style="position:absolute;left: 85%;top:0%;"  class="btn-floating btn-small scale-transition"><i class=" material-icons">add</i></a>
@@ -42,7 +48,9 @@ export default {
                 menu:-1,
                 left:0,
                 top:0,
-                width:'1px',
+                width:width,
+                height:height,
+              
                 
                 }
             }
@@ -82,13 +90,16 @@ export default {
             },
             myDrag(event){
              //   this.$parent.$options.methods.myDrag(this.card.id);
-             if (event.offsetY > 37){return}
+             if (event.offsetX > this.$parent.get_size(this.card.id).width * 0.8 && event.offsetY > this.$parent.get_size(this.card.id).height * 0.8    ){this.$parent.$emit('resize',this.card.id,event.offsetX, event.offsetY)}
+             if (event.offsetY >  this.$parent.get_size(this.card.id).height * 0.2 ){return}
+             
+            
+             
              this.position = 'absolute'
-
              this.$parent.$emit('drag', this.card.id,event.offsetX, event.offsetY);
              
              
-             console.log(event)
+       
             },
             myDragStop(event){
              //    this.$parent.$options.methods.myDragStop(this.card.id);
