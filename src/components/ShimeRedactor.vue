@@ -97,24 +97,17 @@ export default {
             let y = searh_coord.getBoundingClientRect().y
             return {x:x,y:y,left:x,top:y}
         },
-    distance_x_check(block1,block2,dist=1){  //для одной по x
+    distance_x_check(block1,block2,dist=5){  //для одной по x
     let dist_left = dist
-    if (this.get_position(block1.id).x > this.get_position(block2.id).x){
-    dist_left =   this.get_position(block1.id).x   - this.get_position(block2.id).x
-    }else{
-        dist_left =   this.get_position(block2.id).x -  this.get_position(block1.id).x
-    }  
-    return  parseInt(dist_left) <= dist
+     dist_left =    Math.abs(  this.get_position(block1.id).y  -  this.get_position(block2.id).y)
+    return  parseInt(dist_left) <= parseInt(dist)
 
     },
     distance_x_check_center(block1,block2,dist=1){ //для одной по x
     let dist_left = dist
-    if (this.get_position(block1.id).x  + this.get_size(block1.id).width / 2    > this.get_position(block2.id).x  + this.get_size(block2.id).width / 2  ){
-    dist_left =  this.get_position(block1.id).x  + this.get_size(block1.id).width / 2 -   this.get_position(block2.id).x  + this.get_size(block2.id).width / 2
-    }else{
-        dist_left =   this.get_position(block2.id).x  + this.get_size(block2.id).width / 2 -   this.get_position(block1.id).x  + this.get_size(block1.id).width / 2
-    }  
-    return  parseInt(dist_left) <= dist
+     dist_left  =    Math.abs(  (this.get_position(block1.id).y  + this.get_size(block1.id).width / 2   )     - (  this.get_position(block2.id).y +  this.get_size(block2.id).width / 2     ))
+   
+    return  parseInt( dist_left ) <= dist
     },
 
     get_size(id){
@@ -146,8 +139,9 @@ export default {
             (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -2 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 2)  
             ||
             (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -2 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 2)  )    )
-            let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card) )   
-           
+           let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card) )
+           let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card) )
+           console.log(na_odn_osi_x_center) 
             if (na_odn_osi_y.length){
                 let all_array = na_odn_osi_y.slice()
                 all_array.push(active)
@@ -175,12 +169,22 @@ export default {
             let all_array = na_odn_osi_x.slice()
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopY =    parseInt(active.top) +  parseInt( this.get_size(active.id).height /2 )  + 'px'
-                this.lineLeftY = parseInt(sort_y[0].left) +  parseInt( this.get_size(sort_y[0].id).height /2 )  + 'px'  
+                this.lineTopY =    parseInt(active.top)
+                this.lineLeftY = parseInt(sort_y[0].left) 
                 this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
                 this.linecurrentY = 'Linetoblock'
            }else{
                this.linecurrentY = ''
+           }
+           if (na_odn_osi_x_center.length){
+                  let all_array =na_odn_osi_x_center.slice()
+               all_array.push(active)
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+                this.lineTopX2 =    parseInt(active.top) +  parseInt( this.get_size(active.id).height /2 )  + 'px'
+                this.lineLeftX2 = parseInt(sort_y[0].left) +  parseInt( this.get_size(sort_y[0].id).height /2 )  + 'px'  
+                this.lineWidthX2 =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
+                this.linecurrentX2 = 'Linetoblock'
+
            }
         },
            
