@@ -28,6 +28,12 @@
          v-bind:left="lineLeftY"
          v-bind:width="lineWidthY"
          ></component>
+
+                 <component v-bind:is="linecurrentY2" 
+         v-bind:top="lineTopY2"
+         v-bind:left="lineLeftY2"
+         v-bind:width="lineWidthY2"
+         ></component>
         </div>
     </div>
 
@@ -53,9 +59,14 @@ export default {
     lineWidthY:"200px",
     lineTopY:"200px",
     lineLeftY:"200px",
+    lineWidthY2:"200px",
+    lineTopY2:"200px",
+    lineLeftY2:"200px",
 
     linecurrentX:'Linetoblock',
     linecurrentY:'Linetoblock',
+    linecurrentY2:'Linetoblock',
+  
     cards:[
         {id:1,color:'red',top:10,left:10,name:"block",width:'200px',height:'200px'},
         {id:2,color:'grey',top:50,left:20,name:"block2",width:'200px',height:'200px'},
@@ -85,6 +96,7 @@ export default {
         this.dragged = -1;
         this.linecurrentX = '';
         this.linecurrentY = '';
+        this.linecurrentY2 = '';
         })
     },
     computed:{
@@ -109,6 +121,11 @@ export default {
    
     return  parseInt( dist_left ) <= dist
     },
+    distance_x_check_bott(block1,block2,dist=1){
+         let dist_left  =    Math.abs(  (this.get_position(block1.id).y  + this.get_size(block1.id).height    )     - (  this.get_position(block2.id).y +  this.get_size(block2.id).height     ))
+        return   parseInt( dist_left ) <= dist
+    },
+    
 
     get_size(id){
          let searh_coord = document.getElementById(id+'')
@@ -136,12 +153,24 @@ export default {
             active.left =  parseInt(event.clientX) - parseInt(this.clickX)  - 10   +  'px' ;
             active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop)  - 70    + 'px';
             let na_odn_osi_y = this.cards.filter( card => card.id !== this.dragged && (
-            (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -2 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 2)  
+            (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 1)  
             ||
-            (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -2 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 2)  )    )
-           let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card) )
-           let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card) )
-           console.log(na_odn_osi_x_center) 
+            (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 1)  )    )
+           let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card,0.2) )
+           let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card,0.2) )
+           let na_odn_osi_x_bott =  this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_bott(active,card,0.2) )
+            if (na_odn_osi_x_bott.length){
+                     let all_array = na_odn_osi_x.slice()
+               all_array.push(active)
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+                this.lineTopY =    parseInt(active.top) + 7 + 'px'
+                this.lineLeftY = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
+                this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)   -   parseInt(sort_y.slice(-1)[0].width)      + 'px'
+                this.linecurrentY = 'Linetoblock'
+            }else{
+
+            }
+            
             if (na_odn_osi_y.length){
                 let all_array = na_odn_osi_y.slice()
                 all_array.push(active)
@@ -165,26 +194,29 @@ export default {
             }else{
                 this.linecurrentX = ''
             }
-             if (na_odn_osi_x.length){
+            if (na_odn_osi_x.length){
             let all_array = na_odn_osi_x.slice()
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopY =    parseInt(active.top)
-                this.lineLeftY = parseInt(sort_y[0].left) 
-                this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
+                this.lineTopY =    parseInt(active.top) + 7 + 'px'
+                this.lineLeftY = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
+                this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)   -   parseInt(sort_y.slice(-1)[0].width)      + 'px'
                 this.linecurrentY = 'Linetoblock'
            }else{
                this.linecurrentY = ''
            }
            if (na_odn_osi_x_center.length){
-                  let all_array =na_odn_osi_x_center.slice()
+             
+             let all_array =na_odn_osi_x_center.slice()
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopX2 =    parseInt(active.top) +  parseInt( this.get_size(active.id).height /2 )  + 'px'
-                this.lineLeftX2 = parseInt(sort_y[0].left) +  parseInt( this.get_size(sort_y[0].id).height /2 )  + 'px'  
-                this.lineWidthX2 =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
-                this.linecurrentX2 = 'Linetoblock'
+                this.lineTopY2 =    parseInt(active.top) +  parseInt( this.get_size(active.id).height /2 )  + 'px'
+                this.lineLeftY2 = parseInt(sort_y[0].left) +  parseInt( this.get_size(sort_y[0].id).height /2 )  + 'px'  
+                this.lineWidthY2 =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
+                this.linecurrentY2 = 'Linetoblock'
 
+           }else{
+            this.linecurrentY2 = ''
            }
         },
            
