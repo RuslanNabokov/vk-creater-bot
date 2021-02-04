@@ -17,23 +17,13 @@
          v-bind:card={...card}
 
          />
-         <component v-bind:is="linecurrentX" 
-         v-bind:height="lineHeightX" 
-         v-bind:top="lineTopX"
-         v-bind:left="lineLeftX"
-         width:='15px'
-         ></component>
-        <component v-bind:is="linecurrentY" 
-         v-bind:top="lineTopY"
-         v-bind:left="lineLeftY"
-         v-bind:width="lineWidthY"
-         ></component>
-
-                 <component v-bind:is="linecurrentY2" 
-         v-bind:top="lineTopY2"
-         v-bind:left="lineLeftY2"
-         v-bind:width="lineWidthY2"
-         ></component>
+        <Linetoblock  v-for="(line,id) in  lines" 
+         v-bind:top=line.top
+          v-bind:width=line.width
+         v-bind:left=line.left
+         v-bind:color=line.color
+         
+        /> 
         </div>
     </div>
 
@@ -53,24 +43,14 @@ export default {
     resize:-1,
     left:1,
     top:1,
-    lineHeightX:"250px",
-    lineTopX:"200px",
-    lineLeftX:"200px",
-    lineWidthY:"200px",
-    lineTopY:"200px",
-    lineLeftY:"200px",
-    lineWidthY2:"200px",
-    lineTopY2:"200px",
-    lineLeftY2:"200px",
+    lines:[],
+    connections:new Map(Object.entries({'1':'2'})),
 
-    linecurrentX:'Linetoblock',
-    linecurrentY:'Linetoblock',
-    linecurrentY2:'Linetoblock',
   
     cards:[
-        {id:1,color:'red',top:10,left:10,name:"block",width:'200px',height:'200px'},
-        {id:2,color:'grey',top:50,left:20,name:"block2",width:'200px',height:'200px'},
-        {id:3,color:'yellow',top:100,left:30,name:"block3",width:'200px',height:'200px'},
+        {id:1,color:'red',top:10,left:10,name:"block",width:'200px',height:'200px',overlap_opacity:false} ,
+        {id:2,color:'grey',top:50,left:20,name:"block2",width:'200px',height:'200px',overlap_opacity:false},
+        {id:3,color:'yellow',top:100,left:30,name:"block3",width:'200px',height:'200px',overlap_opacity:false},
 
     ]
     }),
@@ -80,35 +60,66 @@ export default {
             this.dragged = id
             this.clickX = x,
             this.clickY = y
-            
+          
+            document.getElementById(`block-${id}`).style.zIndex = "9999"
          }), 
         this.$on('resize',function(id,x,y){
- 
         this.resize = id;
-        
-
+        document.getElementById(`block-${id}`).style.zIndex = "9999"
+        // let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
         }), 
         
 
 
         this.$on('stopdrag', function (id) { 
-        this.resize = -1;
+        let active_ = this.cards[this.cards.findIndex( card => card.id === this.resize || card.id === this.dragged  ) ]
+        if (active_){
+        active_.overlap_opacity = false
+        }
+        
+       this.resize = -1;
         this.dragged = -1;
-        this.linecurrentX = '';
-        this.linecurrentY = '';
-        this.linecurrentY2 = '';
+         this.lines = []
+        
+    document.getElementById(`block-${id}`).style.zIndex = "10"
+         try {
+           this.cards.forEach( function (e){
+                        e.info_bot = ''
+                        e.info_left = ''                    }
+                 ) 
+         } catch {
+
+         } 
+            
+        
+
         })
     },
     computed:{
-   
+            connections_arr: function(){
+            //  let  arr_conn =  new Array()
+            //  for ([key,value] of this.connections.entries() ){
+            //     var  x =  this.get_center(key).x  
+            //     var y =   this.get_center(key).y
+            //     var x_ = this.get_center(value).x
+            //     var y_ = this.get_center(value).y
+            //     var x__ =  x < x_  ? x : x_
+            //     var y__ =  y < y_  ? y : y_
+            //     var width =   Math.max.apply(null, [x,x_])  - x__
+            //     var height =   
+                  
+            //     arr_conn.push([x])
+            //  }
+            //   return  // array([[x,y][x,y]],[[x,y],[x,y]])
+           }
     },
     methods:{
     get_position(id){
-            let searh_coord = document.getElementById(id+'')
+            let searh_coord = document.getElementById(`block-${id}`)
             let x = searh_coord.getBoundingClientRect().x
             let y = searh_coord.getBoundingClientRect().y
             return {x:x,y:y,left:x,top:y}
-        },
+    },
     distance_x_check(block1,block2,dist=5){  //для одной по x
     let dist_left = dist
      dist_left =    Math.abs(  this.get_position(block1.id).y  -  this.get_position(block2.id).y)
@@ -125,108 +136,173 @@ export default {
          let dist_left  =    Math.abs(  (this.get_position(block1.id).y  + this.get_size(block1.id).height    )     - (  this.get_position(block2.id).y +  this.get_size(block2.id).height     ))
         return   parseInt( dist_left ) <= dist
     },
-    
-
     get_size(id){
-         let searh_coord = document.getElementById(id+'')
+         let searh_coord = document.getElementById(`block-${id}`)
           let width = searh_coord.getBoundingClientRect().width
         let height = searh_coord.getBoundingClientRect().height
         return {width:width,height:height}
     },
+    get_center(id){
+    let x =  parseInt(this.get_position(id).x)  + parseInt(this.get_size(id).width) /2
+    let y =   parseInt(this.get_position(id).y)  + parseInt(this.get_size(id).height ) /2
+   
+    return {x,y}
+    },
+
+     get_bottom(id){
+       let x =  parseInt(this.get_position(id).x)  
+    let y =   parseInt(this.get_position(id).y)  + parseInt(this.get_size(id).height ) 
+   
+    return {x,y}
+    },
+
         myDrag(){
             
          
         },
-        moveAt(event){           
 
-        },
     mouseMove(event){
+               // this.dragged= -1
+           
             if(this.resize != -1){ 
                 let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
+                this.cards.forEach( function (e){
+                        e.info_bot = ''
+                        e.info_left = ''                    }
+                 ) 
                 active.width =    parseInt(event.clientX)  - this.get_position(active.id).x + 1    + 'px' 
-                 active.height =  parseInt(event.clientY)  - this.get_position(active.id).y + 1    + 'px' 
-                console.log( event)
-
-            }
-            if(this.dragged == -1){ return}
-            let active = this.cards[this.cards.findIndex( card => card.id === this.dragged ) ]
-            active.left =  parseInt(event.clientX) - parseInt(this.clickX)  - 10   +  'px' ;
-            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop)  - 70    + 'px';
-            let na_odn_osi_y = this.cards.filter( card => card.id !== this.dragged && (
-            (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 1)  
-            ||
-            (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 1)  )    )
-           let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card,0.2) )
-           let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card,0.2) )
-           let na_odn_osi_x_bott =  this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_bott(active,card,0.2) )
-            if (na_odn_osi_x_bott.length){
-                     let all_array = na_odn_osi_x.slice()
-               all_array.push(active)
-               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopY =    parseInt(active.top) + 7 + 'px'
-                this.lineLeftY = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
-                this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)   -   parseInt(sort_y.slice(-1)[0].width)      + 'px'
-                this.linecurrentY = 'Linetoblock'
-            }else{
-
-            }
-            
-            if (na_odn_osi_y.length){
-                let all_array = na_odn_osi_y.slice()
-                all_array.push(active)
-                let sort_x =  all_array.sort((a,b)=>{  if (parseInt(a.top) <  parseInt(b.top) ){return -1}else if (parseInt(a.top) >  parseInt(b.top)) {return 1 }else{return 0}     })
-                this.lineTopX =  parseInt(sort_x[0].top) +   parseInt( this.get_size(sort_x[0].id).height /2 )  + 'px'     
-                this.lineLeftX = parseInt(active.left) +  parseInt( this.get_size(sort_x[0].id).width /2 )  + 'px' 
-             //   this.lineHeightX =   ( parseInt(na_odn_osi_x.slice(-1)[0].top) - parseInt(parseInt(na_odn_osi_x[0].top) ) ) + (parseInt(this.get_size( na_odn_osi_x.slice(-1)[0].id  ).height / 2 ) + parseInt(this.get_size(na_odn_osi_x[0].id).height / 2 )  )  + 'px'
-                this.lineHeightX =   parseInt(this.get_position(sort_x.slice(-1)[0].id).y)  -   parseInt(this.get_position(sort_x[0].id).y)       + 'px'
-                
-                // let position)
-                // let os_start_x = parseInt(active.top) >  parseInt( this.get_position(na_odn_osi_x.id).y)   ?  parseInt(active.left) + 60 + 'px'
-                // if (){
+                active.height =  parseInt(event.clientY)  - this.get_position(active.id).y + 1    + 'px'
                     
-                //        this.lineLeft = parseInt(active.left) + 60 + 'px'
-                //        this.lineTop =parseInt(this.get_position(na_odn_osi_x.id).y) + 'px'
-                       
-                //        this.lineHeight = ( parseInt(active.top) - parseInt(this.get_position(na_odn_osi_x.id).y) ) + (this.get_size(active.id).height / 2  + this.get_size(na_odn_osi_x.id).height / 2   )  + 'px'
-                //        this.linecurrent = 'Linetoblock'
-                //        }
-                this.linecurrentX = 'Linetoblock'
-            }else{
-                this.linecurrentX = ''
-            }
-            if (na_odn_osi_x.length){
-            let all_array = na_odn_osi_x.slice()
-               all_array.push(active)
-               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopY =    parseInt(active.top) + 7 + 'px'
-                this.lineLeftY = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
-                this.lineWidthY =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)   -   parseInt(sort_y.slice(-1)[0].width)      + 'px'
-                this.linecurrentY = 'Linetoblock'
-           }else{
-               this.linecurrentY = ''
-           }
-           if (na_odn_osi_x_center.length){
-             
-             let all_array =na_odn_osi_x_center.slice()
-               all_array.push(active)
-               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                this.lineTopY2 =    parseInt(active.top) +  parseInt( this.get_size(active.id).height /2 )  + 'px'
-                this.lineLeftY2 = parseInt(sort_y[0].left) +  parseInt( this.get_size(sort_y[0].id).height /2 )  + 'px'  
-                this.lineWidthY2 =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)  -   parseInt(this.get_position(sort_y[0].id).x)       + 'px'
-                this.linecurrentY2 = 'Linetoblock'
+                active.info_bot = parseInt(active.width)
+                active.info_left = parseInt(active.height)
 
+                let odn_razm_width  = this.cards.filter( card => card.id !== this.resize && ( 
+                        parseInt(card.width) == parseInt(active.width)   
+                        ) )
+                 let odn_razm_height  = this.cards.filter( card => card.id !== this.resize && ( 
+                        parseInt(card.height) == parseInt(active.height)   
+                        ) )
+                odn_razm_width.forEach(e => e.info_bot =  parseInt(e.width) );
+                 odn_razm_height.forEach(e => e.info_left =  parseInt(e.height) );
+                
+            }
+            if(this.dragged == -1 && this.resize == -1  ){ return}
+            this.lines=[]
+            let active = this.cards[this.cards.findIndex( card => card.id == this.resize  || card.id == this.dragged     ) ]
+            
+            if (this.resize == -1 ){
+           
+            active.left =  parseInt(event.clientX) - parseInt(this.clickX)    +  'px' ;
+            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop)  - 56    + 'px';
+            let overlab_block = new Array()
+            overlab_block  =   this.cards.filter(card => card.id  !== this.dragged &&  card.id !== this.resize &&
+
+            (
+            (
+            (parseInt(this.get_position(active.id).y) + parseInt(this.get_size(active.id).height)   -   
+             parseInt(this.get_position(card.id).y)   <=  parseInt(this.get_size(card.id).height) 
+            && 
+            parseInt(this.get_position(active.id).y) + parseInt(this.get_size(active.id).height)   -   
+            parseInt(this.get_position(card.id).y)     > 0 )
+            ||
+            (
+            parseInt(this.get_position(card.id).y) + parseInt(this.get_size(card.id).height)   -   
+            parseInt(this.get_position(active.id).y)   <= parseInt(this.get_size(active.id).height) 
+             &&
+             parseInt(this.get_position(card.id).y) + parseInt(this.get_size(card.id).height)  -
+            parseInt(this.get_position(active.id).y)     > 0 
+            )
+            )
+            &&(
+            (parseInt(this.get_position(active.id).x) + parseInt(this.get_size(active.id).width)   -
+             parseInt(this.get_position(card.id).x)   <=  parseInt(this.get_size(card.id).width)
+            &&
+            parseInt(this.get_position(active.id).x) + parseInt(this.get_size(active.id).width)   -
+            parseInt(this.get_position(card.id).x)     > 0 )
+            ||
+            (
+            parseInt(this.get_position(card.id).x) + parseInt(this.get_size(card.id).width)   -
+            parseInt(this.get_position(active.id).x)   <= parseInt(this.get_size(active.id).width)
+             &&
+             parseInt(this.get_position(card.id).x) + parseInt(this.get_size(card.id).width)  -
+            parseInt(this.get_position(active.id).x)     > 0
+            )
+            )
+            )
+            )
+           if(overlab_block.length){
+             active.overlap_opacity  = true
            }else{
-            this.linecurrentY2 = ''
+               active.overlap_opacity=false
            }
+            }
+            let na_ond_osi_x_top =  this.cards.filter( card => card.id !== this.dragged  && card.id !== this.resize  &&  (  
+            Math.abs(parseInt(this.get_position(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0 
+            || 
+            Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+            ||
+             Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+                ) )
+            let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged  && card.id !== this.resize && (  
+            Math.abs(parseInt(this.get_center(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0
+            || 
+            Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+            ||
+             Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+                ) )
+            let na_odn_osi_x_bottom = this.cards.filter( card =>  card.id !== this.dragged  && card.id !== this.resize && (  
+            Math.abs(parseInt(this.get_bottom(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0
+            || 
+            Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+            ||
+             Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+                ) )
+ 
+     
+            if ( na_ond_osi_x_top.length){
+              let all_array = na_ond_osi_x_top.slice()
+               all_array.push(active)
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+                let top_line  =    parseInt(active.top)  + 'px'
+                 let left_line = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
+                let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   -  parseInt(sort_y[0].width) -   parseInt(this.get_position(sort_y[0].id).x)           + 'px'
+                this.lines.push({width:width_line, top:top_line,  left:left_line})
+               
+               
+            }else{}
+           if  (na_odn_osi_x_center.length){
+                 let all_array = na_odn_osi_x_center.slice()
+               all_array.push(active)
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+                let top_line  =    parseInt(active.top) +  ( parseInt(this.get_size(active.id).height) / 2  )  + 'px'
+                 let left_line = parseInt(sort_y[0].left) +   ( parseInt(this.get_size(sort_y[0].id).width) / 2  )   + 'px'    
+                let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   +  ( parseInt(this.get_size(sort_y.slice(-1)[0].id).width) / 2  )  -   parseInt(this.get_position(sort_y[0].id).x)      -  ( parseInt(this.get_size(sort_y[0].id).width) / 2  )      + 'px'
+                this.lines.push({width:width_line, top:top_line,  left:left_line})
+           }else{}
+              if  (na_odn_osi_x_bottom.length){
+                let all_array = na_odn_osi_x_bottom.slice()
+               all_array.push(active)
+             
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+                let top_line  =    parseInt(active.top)  +  parseInt(active.height)  + 'px'
+                 let left_line = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
+                let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   -  parseInt(sort_y[0].width) -   parseInt(this.get_position(sort_y[0].id).x)           + 'px'
+                this.lines.push({width:width_line, top:top_line,  left:left_line})
+           }else{}
+          
+        //     let na_odn_osi_y = this.cards.filter( card => card.id !== this.dragged && (
+        //     (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 1)  
+        //     ||
+        //     (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 1)  )    )
+        //    let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card,0.2) )
+        //    let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card,0.2) )
+        //    let na_odn_osi_x_bott =  this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_bott(active,card,0.2) )
+           
+  
         },
            
 
-    myDragStop(id) {
-        if (this.dragged == id){
-       // this.dragged= -1
-        
-        }else{}
-        },
+
     //     isDragging() {
     //     return this.dragged != -1;
     // },
@@ -259,5 +335,8 @@ export default {
         position: relative;
         width:100%;
         height: 100%;
+    }
+    .card{
+        margin:0px  !important;
     }
 </style>

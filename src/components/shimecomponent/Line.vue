@@ -1,16 +1,19 @@
 <template>
-    <div class="line" style="position:absolute; background-color:red" v-bind:style="{height:height,left:left,top:top,width:width}"> </div>
+    <div class="line" style="position:absolute" v-bind:style="{height:height,left:left,top:top,width:width,backgroundColor:color}"> </div>
 </template>
 
 <script>
 export default {
      name:'Linetoblock',
      props:{
-         'height': {type: String, default: '5px'} ,
-         'top': String  ,
-         'left':String ,
-         'width':{type: String, default: '5px'},
-         }
+
+         'top': String ,
+         'left':String,
+         'color':{type:String,default:'red'},
+
+          'width':{type: String, default: '5px'},
+          'height':{type: String, default: '1px'}
+         },
 }
 </script>
 <style scoped>
