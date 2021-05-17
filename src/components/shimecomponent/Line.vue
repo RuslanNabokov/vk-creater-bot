@@ -9,10 +9,11 @@ export default {
 
          'top': String ,
          'left':String,
-         'color':{type:String,default:'red'},
+         'color':{type:String,default:'green'},
 
           'width':{type: String, default: '5px'},
-          'height':{type: String, default: '1px'}
+          'height':{type: String, default: '1px'},
+          'rotate':{type:String,default:'0px'}
          },
 }
 </script>

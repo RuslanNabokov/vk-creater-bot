@@ -44,7 +44,7 @@ export default {
     left:1,
     top:1,
     lines:[],
-    connections:new Map(Object.entries({'1':'2'})),
+    connections: new Map(Object.entries({'1':'1' })),
 
   
     cards:[
@@ -96,22 +96,7 @@ export default {
         })
     },
     computed:{
-            connections_arr: function(){
-            //  let  arr_conn =  new Array()
-            //  for ([key,value] of this.connections.entries() ){
-            //     var  x =  this.get_center(key).x  
-            //     var y =   this.get_center(key).y
-            //     var x_ = this.get_center(value).x
-            //     var y_ = this.get_center(value).y
-            //     var x__ =  x < x_  ? x : x_
-            //     var y__ =  y < y_  ? y : y_
-            //     var width =   Math.max.apply(null, [x,x_])  - x__
-            //     var height =   
-                  
-            //     arr_conn.push([x])
-            //  }
-            //   return  // array([[x,y][x,y]],[[x,y],[x,y]])
-           }
+
     },
     methods:{
     get_position(id){
@@ -163,7 +148,7 @@ export default {
 
     mouseMove(event){
                // this.dragged= -1
-           
+
             if(this.resize != -1){ 
                 let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
                 this.cards.forEach( function (e){
@@ -183,7 +168,7 @@ export default {
                         parseInt(card.height) == parseInt(active.height)   
                         ) )
                 odn_razm_width.forEach(e => e.info_bot =  parseInt(e.width) );
-                 odn_razm_height.forEach(e => e.info_left =  parseInt(e.height) );
+                odn_razm_height.forEach(e => e.info_left =  parseInt(e.height) );
                 
             }
             if(this.dragged == -1 && this.resize == -1  ){ return}
@@ -193,7 +178,7 @@ export default {
             if (this.resize == -1 ){
            
             active.left =  parseInt(event.clientX) - parseInt(this.clickX)    +  'px' ;
-            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop)  - 56    + 'px';
+            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 56 + 'px';
             let overlab_block = new Array()
             overlab_block  =   this.cards.filter(card => card.id  !== this.dragged &&  card.id !== this.resize &&
 
