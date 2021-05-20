@@ -17,17 +17,28 @@
          v-bind:card={...card}
 
          />
-        <Linetoblock  v-for="(line,id) in  lines" 
+        <MLine  v-for="(line,id) in  lines" 
          v-bind:top=line.top
           v-bind:width=line.width
          v-bind:left=line.left
          v-bind:color=line.color
-         
-        /> 
+        />
+
+        <Linetoblock v-for="connect in connections" 
+        v-bind:x1=cards[connect.card_id].left
+        v-bind:y1=cards[connect.card_id].top
+        v-bind:x2=cards[connect.to_card_id].left
+        v-bind:y2=cards[connect.to_card_id].top
+        > </Linetoblock>
+
+
+
         </div>
+
+        
     </div>
 
-    
+
 </template>
 
 <script>
@@ -35,7 +46,9 @@
 
 
 import Block from  '@/components/shimecomponent/Block'
-import Linetoblock from  '@/components/shimecomponent/Line'
+import MLine from  '@/components/shimecomponent/Line'
+import Linetoblock from  '@/components/shimecomponent/LinetoBlock'
+
 export default {
     name:'ShimeRedactor',
     data:() => ({
@@ -44,7 +57,7 @@ export default {
     left:1,
     top:1,
     lines:[],
-    connections: new Map(Object.entries({'1':'1' })),
+    connections: new Array({card_id:1,to_card_id:2,type:'common_line',height:200 }),
 
   
     cards:[
@@ -54,7 +67,7 @@ export default {
 
     ]
     }),
-    components:{Block,Linetoblock},
+    components:{Block,MLine,Linetoblock},
     mounted(){
         this.$on('drag', function (id,x,y) { 
             this.dragged = id
