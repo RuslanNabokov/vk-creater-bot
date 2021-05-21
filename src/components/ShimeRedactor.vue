@@ -29,6 +29,8 @@
         v-bind:y1=cards[connect.card_id].top
         v-bind:x2=cards[connect.to_card_id].left
         v-bind:y2=cards[connect.to_card_id].top
+        v-bind:current_pos_x=current_pos_x
+         v-bind:current_pos_y=current_pos_y
         > </Linetoblock>
 
 
@@ -57,6 +59,8 @@ export default {
     left:1,
     top:1,
     lines:[],
+    current_pos_x:0,
+    current_pos_y:0,
     connections: new Array({card_id:1,to_card_id:2,type:'common_line',height:200 }),
 
   
@@ -161,7 +165,13 @@ export default {
 
     mouseMove(event){
                // this.dragged= -1
-
+            // current_pos_y
+//             offsetX: 865
+// offsetY: 485
+// pageX: 865
+// pageY: 548
+            this.current_pos_x = event.clientX
+            this.current_pos_y = event.clientY
             if(this.resize != -1){ 
                 let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
                 this.cards.forEach( function (e){
