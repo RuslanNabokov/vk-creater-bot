@@ -31,6 +31,7 @@
         v-bind:y2=cards[connect.to_card_id].top
         v-bind:current_pos_x=current_pos_x
          v-bind:current_pos_y=current_pos_y
+         v-bind:peres=calc_peres(connect.card_id,connect.to_card_id)
         > </Linetoblock>
 
 
@@ -116,6 +117,20 @@ export default {
 
     },
     methods:{
+    
+
+    calc_peres(card_id,to_card_id ){
+        let x1=this.cards[card_id].left
+        let y1= this.cards[card_id].top
+        let x2= this.cards[to_card_id].left
+        let y2= this.cards[to_card_id].top
+   let k = (parseFloat(y1) - parseFloat(y2))  / (parseFloat(x1) - parseFloat(x2) );
+
+   let b =   parseFloat(y2)  - (parseFloat(k) * parseFloat(x2));
+   let pred_y =  Math.abs(parseFloat(k) * parseFloat(this.current_pos_x) +  parseFloat(b));  
+   return   pred_y - Math.abs(parseFloat(this.current_pos_y))  >= -20 && pred_y - Math.abs(parseFloat(this.current_pos_y))  <= 20
+    },
+    
     get_position(id){
             let searh_coord = document.getElementById(`block-${id}`)
             let x = searh_coord.getBoundingClientRect().x

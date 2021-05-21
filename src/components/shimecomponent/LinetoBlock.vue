@@ -1,7 +1,7 @@
 <template>
 <div class='root' >
     <svg  ref='chart'>
-  <line   class='line' v-bind:x1="x1" v-bind:y1="y1" v-bind:x2="x2" v-bind:y2="y2" style="stroke:rgb(255,255,0);stroke-width:2" />
+  <line   class='line' v-bind:x1="x1" v-bind:y1="y1" v-bind:x2="x2" v-bind:y2="y2" :style="{ 'stroke-width': peres ? '10' : '2' }"  style="stroke:rgb(255,255,0);stroke-width:2" />
 </svg>
 </div>
 </template>
@@ -10,7 +10,11 @@
 import Victor from 'victor'
 export default {
      name:'Linetoblock',
+     data:()=>({
+         k: 0,
+     }),
      props:{
+         'peres':{default:0},
         'current_pos_x': {default:0},
         'current_pos_y':{default: 0},
          'x1': {default:10} ,
@@ -39,8 +43,7 @@ export default {
         get_y1(){  return parseInt(this.y1) + 'px'},
         get_x2(){return parseInt(this.x2) + 'px'},  
         get_y2(){return parseInt(this.y2) + 'px'},
-        koef(){ this.k = (parseInt(this.y1) - parseInt(this.y2))  / (parseInt(this.x1) - parseInt(this.x2) );this.b =   parseInt(this.y2)  - (parseInt(this.k) * parseInt(this.x2)); return [this.k,this.b]   },
-        peres(){ return     parseInt(this.k) * parseInt(this.current_pos_x) +  parseInt(this.b) -  parseInt(this.current_pos_y)   }
+
     },
     methods:{
     }
