@@ -15,13 +15,14 @@
         </div> -->
         <Block v-for="card in cards"  :key="card.id"
          v-bind:card={...card}
-
+         v-bind:dedicated=isdedicated(card.id)
          />
         <MLine  v-for="(line,id) in  lines" 
          v-bind:top=line.top
           v-bind:width=line.width
          v-bind:left=line.left
          v-bind:color=line.color
+
         />
 
         <Linetoblock v-for="connect in connections" 
@@ -29,6 +30,7 @@
         v-bind:y1=cards[connect.card_id].top
         v-bind:x2=cards[connect.to_card_id].left
         v-bind:y2=cards[connect.to_card_id].top
+       
         v-bind:current_pos_x=current_pos_x
          v-bind:current_pos_y=current_pos_y
          v-bind:peres=calc_peres(connect.card_id,connect.to_card_id)
@@ -56,6 +58,8 @@ export default {
     name:'ShimeRedactor',
     data:() => ({
     dragged:-1,
+
+    dedicated:[],
     resize:-1,
     left:1,
     top:1,
@@ -74,6 +78,15 @@ export default {
     }),
     components:{Block,MLine,Linetoblock},
     mounted(){
+        this.$on('addBlockInarraydedicated',(card_id)=>{
+            let index_ = this.dedicated.indexOf(card_id)
+            if (index_ == -1){
+            this.dedicated.push(card_id)}else{ 
+                this.dedicated.splice(index_,1)
+            }
+
+         }),
+
         this.$on('drag', function (id,x,y) { 
             this.dragged = id
             this.clickX = x,
@@ -83,7 +96,7 @@ export default {
          }), 
         this.$on('resize',function(id,x,y){
         this.resize = id;
-        document.getElementById(`block-${id}`).style.zIndex = "9999"
+        // document.getElementById(`block-${id}`).style.zIndex = "9999"
         // let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
         }), 
         
@@ -118,7 +131,9 @@ export default {
     },
     methods:{
     
-
+    isdedicated(id){
+        return  this.dedicated.indexOf(id) != -1
+    },
     calc_peres(card_id,to_card_id ){
         let x1=this.cards[card_id].left
         let y1= this.cards[card_id].top
@@ -128,7 +143,7 @@ export default {
 
    let b =   parseFloat(y2)  - (parseFloat(k) * parseFloat(x2));
    let pred_y =  Math.abs(parseFloat(k) * parseFloat(this.current_pos_x) +  parseFloat(b));  
-   return   pred_y - Math.abs(parseFloat(this.current_pos_y))  >= -20 && pred_y - Math.abs(parseFloat(this.current_pos_y))  <= 20
+   return   (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  >= -10 && (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  <= 10
     },
     
     get_position(id){
@@ -194,7 +209,7 @@ export default {
                         e.info_left = ''                    }
                  ) 
                 active.width =    parseInt(event.clientX)  - this.get_position(active.id).x + 1    + 'px' 
-                active.height =  parseInt(event.clientY)  - this.get_position(active.id).y + 1    + 'px'
+                active.height =  parseInt(event.clientY)  - this.get_position(active.id).y + 10    + 'px'
                     
                 active.info_bot = parseInt(active.width)
                 active.info_left = parseInt(active.height)
@@ -205,6 +220,19 @@ export default {
                  let odn_razm_height  = this.cards.filter( card => card.id !== this.resize && ( 
                         parseInt(card.height) == parseInt(active.height)   
                         ) )
+
+                if (this.dedicated.indexOf(this.resize) != -1){
+                 
+                    this.dedicated.forEach(element => {
+                        let card =  this.cards[this.cards.findIndex( card => card.id == element ) ]
+
+                        card.width = active.width
+                        card.height = active.height
+                        card.info_bot = active.info_bot
+                        card.info_left = active.info_left
+
+                    });
+                }
                 odn_razm_width.forEach(e => e.info_bot =  parseInt(e.width) );
                 odn_razm_height.forEach(e => e.info_left =  parseInt(e.height) );
                 
@@ -216,7 +244,7 @@ export default {
             if (this.resize == -1 ){
            
             active.left =  parseInt(event.clientX) - parseInt(this.clickX)    +  'px' ;
-            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 56 + 'px';
+            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
             let overlab_block = new Array()
             overlab_block  =   this.cards.filter(card => card.id  !== this.dragged &&  card.id !== this.resize &&
 

@@ -2,7 +2,8 @@
     <div   
      
     v-bind:id = "'block-' + card.id"
-    v-bind:class="{'opacity-overlab-block':card.overlap_opacity }"
+    v-bind:class="{'opacity-overlab-block':card.overlap_opacity}"
+    v-on:click.ctrl.exact="addBlockInarraydedicated()"
     class="block-shime  card sticky-action row" 
     style="display:relative;margin:0px;padding:0px"
 
@@ -56,6 +57,7 @@ export default {
             default: function() {
                 return {
                 id: 0,
+                dedicated: -1,
                 name: 'block-shime',
                 color: 'grey',
                 menu:-1,
@@ -90,9 +92,18 @@ export default {
     },
 
     methods:{
+
+            
+            isdedicated(){
+                return this.card.dedicated
+            },
             clickRound(id){
                 console.log(id)
                 return false
+            },
+
+            addBlockInarraydedicated(){
+        this.$parent.$emit('addBlockInarraydedicated',this.card.id)
             },
             clickToButtonShowTools(event){
                 
@@ -243,6 +254,8 @@ bottom: -9px;
 
 }
 
-
+[dedicated="true"]{
+   box-shadow:  rgba(50, 52, 167, 0.753) 0px 1px 4px, rgb(8, 10, 112) 0px 0px 0px 3px;
+} 
 
 </style>

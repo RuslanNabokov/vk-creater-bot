@@ -1,8 +1,11 @@
 <template>
 <div class='root' >
-    <svg  ref='chart'>
+    <svg v-if="type=='common'"  ref='chart'>
   <line   class='line' v-bind:x1="x1" v-bind:y1="y1" v-bind:x2="x2" v-bind:y2="y2" :style="{ 'stroke-width': peres ? '10' : '2' }"  style="stroke:rgb(255,255,0);stroke-width:2" />
 </svg>
+ <div v-else>
+     
+ </div>
 </div>
 </template>
 
@@ -14,6 +17,7 @@ export default {
          k: 0,
      }),
      props:{
+         'type':{default:'common'},
          'peres':{default:0},
         'current_pos_x': {default:0},
         'current_pos_y':{default: 0},
@@ -26,16 +30,16 @@ export default {
           'height':{default: '5px'},
          },
     mounted(){
-        this.svg =  d3.select(this.$refs.chart)
-        let vec_1 = new Victor(parseInt(this.x1),parseInt(this.y1));
-        let vec_2 =  new Victor(parseInt(this.x2),parseInt(this.y2));
-        this.vect_arr = []
-       for (const x    of Array(500).keys()) {
-                let vec = vec_1.mix(vec_2,0.9)
+    //     this.svg =  d3.select(this.$refs.chart)
+    //     let vec_1 = new Victor(parseInt(this.x1),parseInt(this.y1));
+    //     let vec_2 =  new Victor(parseInt(this.x2),parseInt(this.y2));
+    //     this.vect_arr = []
+    //    for (const x    of Array(500).keys()) {
+    //             let vec = vec_1.mix(vec_2,0.9)
 
-                this.vect_arr.push([vec.x,vec.y] )
+    //             this.vect_arr.push([vec.x,vec.y] )
                 
-        }
+    //     }
     },
     
     computed:{
