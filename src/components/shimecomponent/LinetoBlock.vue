@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Victor from 'victor'
+// import Victor from 'victor'
 export default {
      name:'Linetoblock',
      data:()=>({

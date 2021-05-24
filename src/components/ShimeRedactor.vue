@@ -1,8 +1,9 @@
 <template>
     <div    style="position:absolute;height:100%;width:100%" >
-        <div style="overflow: hidden;"  v-on:mousemove="mouseMove"   class='field'>
+        <div style="overflow: hidden;"  v-on:mousemove="mouseMove"      class='field'>
        
-        <!-- <div v-for="block in objects" :key="block.id" class='drag'
+        <!-- @contextmenu="rightclick($event)"  
+            <div v-for="block in objects" :key="block.id" class='drag'
          v-bind:style="{
         position: positionByKey(block.id),
         left:block.options.left,
@@ -13,16 +14,21 @@
          v-on:mouseup="myDragStop()"
         >
         </div> -->
+        <MainMenu
+        v-bind:dedicated=dedicated
+        v-bind:cards=cards
+         />
+        <!-- <ContextMenu/> -->
         <Block v-for="card in cards"  :key="card.id"
          v-bind:card={...card}
          v-bind:dedicated=isdedicated(card.id)
          />
+        
         <MLine  v-for="(line,id) in  lines" 
          v-bind:top=line.top
           v-bind:width=line.width
          v-bind:left=line.left
          v-bind:color=line.color
-
         />
 
         <Linetoblock v-for="connect in connections" 
@@ -33,11 +39,17 @@
        
         v-bind:current_pos_x=current_pos_x
          v-bind:current_pos_y=current_pos_y
-         v-bind:peres=calc_peres(connect.card_id,connect.to_card_id)
+         v-bind:peres=calc_peres_card(connect.card_id,connect.to_card_id)
         > </Linetoblock>
 
-
-
+ 
+ <Linetoblock  v-if = "load" 
+            v-bind:x1=get_center_window
+            v-bind:x2= get_center(get_main_card.id).x
+            y1=0
+            v-bind:y2=get_main_card.top
+            v-bind:peres=calc_peres(get_center_window,0,get_center(get_main_card.id).x,get_main_card.top)
+         />
         </div>
 
         
@@ -52,13 +64,19 @@
 
 import Block from  '@/components/shimecomponent/Block'
 import MLine from  '@/components/shimecomponent/Line'
+// import ContextMenu from './context/ContextMenu.vue'
+import MainMenu from './context/MainMenu.vue'
 import Linetoblock from  '@/components/shimecomponent/LinetoBlock'
+import LinetoBlock from './shimecomponent/LinetoBlock.vue'
 
+
+const AXIS_ERR = 10
 export default {
     name:'ShimeRedactor',
     data:() => ({
+    window_width: window.innerWidth,
+    load:false,
     dragged:-1,
-
     dedicated:[],
     resize:-1,
     left:1,
@@ -70,14 +88,21 @@ export default {
 
   
     cards:[
-        {id:1,color:'red',top:10,left:10,name:"block",width:'200px',height:'200px',overlap_opacity:false} ,
+        {id:1,color:'red',top:10,left:10,name:"block",width:'200px',height:'200px',overlap_opacity:false,type:'main'} ,
         {id:2,color:'grey',top:50,left:20,name:"block2",width:'200px',height:'200px',overlap_opacity:false},
         {id:3,color:'yellow',top:100,left:30,name:"block3",width:'200px',height:'200px',overlap_opacity:false},
 
     ]
     }),
-    components:{Block,MLine,Linetoblock},
+    components:{Block,
+                MLine,
+                Linetoblock,
+                MainMenu,
+        LinetoBlock},
     mounted(){
+
+        this.load = true
+
         this.$on('addBlockInarraydedicated',(card_id)=>{
             let index_ = this.dedicated.indexOf(card_id)
             if (index_ == -1){
@@ -127,29 +152,73 @@ export default {
         })
     },
     computed:{
+        get_center_window(){
+            return this.window_width /2
+        },
 
-    },
+    get_main_card(){
+
+       let main_card = this.cards.filter((el)=>{ 
+         return   el.type == 'main'
+       })
+
+       return main_card[0]
+    }, 
+
+    },  
+     watch:{
+
+     },
+     created(){
+          window.addEventListener('resize', this.updateWidth);
+     },
+
+
+    
     methods:{
     
+ 
+
+      updateWidth() {
+        this.window_width = window.innerWidth;
+    },
+    
+
+    rightclick(event){ 
+        console.log(event)
+         event.preventDefault();
+    },
+
+    showContextMenu(){
+
+    },
+
     isdedicated(id){
         return  this.dedicated.indexOf(id) != -1
     },
-    calc_peres(card_id,to_card_id ){
+
+
+    calc_peres(x1,y1,x2,y2){
+        let k = (parseFloat(y1) - parseFloat(y2))  / (parseFloat(x1) - parseFloat(x2) );
+        let b =   parseFloat(y2)  - (parseFloat(k) * parseFloat(x2));
+        let pred_y =  Math.abs(parseFloat(k) * parseFloat(this.current_pos_x) +  parseFloat(b));  
+        return   (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  >= -10 && (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  <= 10
+    },
+    calc_peres_card(card_id,to_card_id ){
         let x1=this.cards[card_id].left
         let y1= this.cards[card_id].top
         let x2= this.cards[to_card_id].left
         let y2= this.cards[to_card_id].top
-   let k = (parseFloat(y1) - parseFloat(y2))  / (parseFloat(x1) - parseFloat(x2) );
-
-   let b =   parseFloat(y2)  - (parseFloat(k) * parseFloat(x2));
-   let pred_y =  Math.abs(parseFloat(k) * parseFloat(this.current_pos_x) +  parseFloat(b));  
-   return   (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  >= -10 && (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  <= 10
+        return this.calc_peres(x1,y1,x2,y2)
     },
-    
+
+
     get_position(id){
+   
             let searh_coord = document.getElementById(`block-${id}`)
             let x = searh_coord.getBoundingClientRect().x
             let y = searh_coord.getBoundingClientRect().y
+            
             return {x:x,y:y,left:x,top:y}
     },
     distance_x_check(block1,block2,dist=5){  //для одной по x
@@ -175,9 +244,9 @@ export default {
         return {width:width,height:height}
     },
     get_center(id){
+
     let x =  parseInt(this.get_position(id).x)  + parseInt(this.get_size(id).width) /2
     let y =   parseInt(this.get_position(id).y)  + parseInt(this.get_size(id).height ) /2
-   
     return {x,y}
     },
 
@@ -288,25 +357,26 @@ export default {
            }
             }
             let na_ond_osi_x_top =  this.cards.filter( card => card.id !== this.dragged  && card.id !== this.resize  &&  (  
-            Math.abs(parseInt(this.get_position(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0 
-            || 
-            Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+                Math.abs( Math.abs(parseInt(this.get_position(active.id).y)  - parseInt(this.get_position(card.id).y)))   <=  AXIS_ERR 
+                || 
+        Math.abs(  Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_center(card.id).y)))   <=  AXIS_ERR
             ||
-             Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+            Math.abs( Math.abs(parseInt(this.get_position(active.id).y )  - parseInt(this.get_bottom(card.id).y)) )  <=  AXIS_ERR
                 ) )
             let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged  && card.id !== this.resize && (  
-            Math.abs(parseInt(this.get_center(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0
+        Math.abs(  Math.abs(parseInt(this.get_center(active.id).y)  - parseInt(this.get_position(card.id).y)) )  <=  AXIS_ERR
             || 
-            Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+        Math.abs(  Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_center(card.id).y))  ) <=  AXIS_ERR
             ||
-             Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+        Math.abs(   Math.abs(parseInt(this.get_center(active.id).y )  - parseInt(this.get_bottom(card.id).y)) )  <=  AXIS_ERR
                 ) )
             let na_odn_osi_x_bottom = this.cards.filter( card =>  card.id !== this.dragged  && card.id !== this.resize && (  
-            Math.abs(parseInt(this.get_bottom(active.id).y)  - parseInt(this.get_position(card.id).y))  == 0
+        Math.abs(  Math.abs(parseInt(this.get_bottom(active.id).y)  - parseInt(this.get_position(card.id).y)) )  <=  AXIS_ERR
             || 
-            Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_center(card.id).y))  == 0
+        Math.abs(  Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_center(card.id).y))  )  <= AXIS_ERR
             ||
-             Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_bottom(card.id).y))  == 0
+        Math.abs(   Math.abs(parseInt(this.get_bottom(active.id).y )  - parseInt(this.get_bottom(card.id).y)) )  <=  AXIS_ERR
+          
                 ) )
  
      
@@ -318,6 +388,14 @@ export default {
                  let left_line = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
                 let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   -  parseInt(sort_y[0].width) -   parseInt(this.get_position(sort_y[0].id).x)           + 'px'
                 this.lines.push({width:width_line, top:top_line,  left:left_line})
+                console.log(event)
+                console.log(active.left + ' active left')
+                if (   Math.abs(Math.abs(event.pageY) - ( Math.abs( parseInt(active.left) + parseInt(this.clickX ) )    ))<= 50  ) {
+
+                        active.top = sort_y[0].top
+                }else{
+
+                }
                
                
             }else{}
@@ -328,6 +406,8 @@ export default {
                 let top_line  =    parseInt(active.top) +  ( parseInt(this.get_size(active.id).height) / 2  )  + 'px'
                  let left_line = parseInt(sort_y[0].left) +   ( parseInt(this.get_size(sort_y[0].id).width) / 2  )   + 'px'    
                 let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   +  ( parseInt(this.get_size(sort_y.slice(-1)[0].id).width) / 2  )  -   parseInt(this.get_position(sort_y[0].id).x)      -  ( parseInt(this.get_size(sort_y[0].id).width) / 2  )      + 'px'
+                
+               
                 this.lines.push({width:width_line, top:top_line,  left:left_line})
            }else{}
               if  (na_odn_osi_x_bottom.length){

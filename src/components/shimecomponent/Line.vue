@@ -26,13 +26,4 @@ export default {
 </script>
 <style scoped>
 
-.line{ 
-     transition: all .5s;
-     stroke-width:2px
-}
-.line:hover{ 
-     stroke-width:5px;
-     transition: all .5s;
-
-}
 </style>
