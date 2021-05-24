@@ -70,7 +70,7 @@ import Linetoblock from  '@/components/shimecomponent/LinetoBlock'
 import LinetoBlock from './shimecomponent/LinetoBlock.vue'
 
 
-const AXIS_ERR = 10
+const AXIS_ERR = 1
 export default {
     name:'ShimeRedactor',
     data:() => ({
@@ -84,6 +84,7 @@ export default {
     lines:[],
     current_pos_x:0,
     current_pos_y:0,
+    stop_movement:[],
     connections: new Array({card_id:1,to_card_id:2,type:'common_line',height:200 }),
 
   
@@ -308,12 +309,18 @@ export default {
             }
             if(this.dragged == -1 && this.resize == -1  ){ return}
             this.lines=[]
+           
             let active = this.cards[this.cards.findIndex( card => card.id == this.resize  || card.id == this.dragged     ) ]
-            
+            let array_stop_y =this.stop_movement.filter((el)=>{ return el.type=='y' && el.id == active.id  })
+       
             if (this.resize == -1 ){
            
+            if (array_stop_y.length < 1 ){
+               
+                 active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
+            }
+            
             active.left =  parseInt(event.clientX) - parseInt(this.clickX)    +  'px' ;
-            active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
             let overlab_block = new Array()
             overlab_block  =   this.cards.filter(card => card.id  !== this.dragged &&  card.id !== this.resize &&
 
@@ -380,25 +387,38 @@ export default {
                 ) )
  
      
-            if ( na_ond_osi_x_top.length){
+            if ( na_ond_osi_x_top.length  ){
+                
               let all_array = na_ond_osi_x_top.slice()
                all_array.push(active)
-               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
-                let top_line  =    parseInt(active.top)  + 'px'
-                 let left_line = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'    
-                let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   -  parseInt(sort_y[0].width) -   parseInt(this.get_position(sort_y[0].id).x)           + 'px'
-                this.lines.push({width:width_line, top:top_line,  left:left_line})
-                console.log(event)
-                console.log(active.left + ' active left')
-                if (   Math.abs(Math.abs(event.pageY) - ( Math.abs( parseInt(active.left) + parseInt(this.clickX ) )    ))<= 50  ) {
-
-                        active.top = sort_y[0].top
+               let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })  
+               
+               
+                if (   Math.abs(event.clientY - ( parseInt(active.top) + parseInt(this.clickY ) )    ) <= 80   && this.resize == -1  ) {
+                    console.log('test')
+                    if (array_stop_y.length < 1 ){this.stop_movement.push({'type':'y','id':active.id});
+                    active.top = active.top
+                    
+                    
+                    }
                 }else{
-
-                }
+                    if( this.resize == -1){
+                       this.stop_movement = []
+                        array_stop_y = []
+                         active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
+                    }
+                    
+                    }
+                 let top_line  =    parseInt(active.top)  + 'px'  
+                let left_line = parseInt(sort_y[0].left) +  parseInt(sort_y[0].width)  + 'px'
+                let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   -  parseInt(sort_y[0].width) -   parseInt(this.get_position(sort_y[0].id).x)           + 'px'
+                 this.lines.push({width:width_line, top:top_line,  left:left_line})
                
-               
-            }else{}
+            }else{
+                 this.stop_movement = []
+                        array_stop_y = []
+ 
+            }
            if  (na_odn_osi_x_center.length){
                  let all_array = na_odn_osi_x_center.slice()
                all_array.push(active)
@@ -423,7 +443,7 @@ export default {
           
         //     let na_odn_osi_y = this.cards.filter( card => card.id !== this.dragged && (
         //     (parseInt(this.get_position(card.id).x    ) -  parseInt(active.left) > -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < 1)  
-        //     ||
+        //     ||if()
         //     (parseInt(this.get_position(card.id).x ) -  parseInt(active.left) < -1 && parseInt(this.get_position(card.id).x ) -  parseInt(active.left) > 1)  )    )
         //    let na_odn_osi_x = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check(active,card,0.2) )
         //    let na_odn_osi_x_center = this.cards.filter( card => card.id !== this.dragged &&  this.distance_x_check_center(active,card,0.2) )
