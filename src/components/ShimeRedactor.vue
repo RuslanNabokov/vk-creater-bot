@@ -311,7 +311,7 @@ export default {
             this.lines=[]
            
             let active = this.cards[this.cards.findIndex( card => card.id == this.resize  || card.id == this.dragged     ) ]
-            let array_stop_y =this.stop_movement.filter((el)=>{ return el.type=='y' && el.id == active.id  })
+            let array_stop_y =this.stop_movement.filter((el)=>{ return ( el.type=='y'   )  && el.id == active.id  })
        
             if (this.resize == -1 ){
            
@@ -392,19 +392,16 @@ export default {
               let all_array = na_ond_osi_x_top.slice()
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })  
+                
                
-               
-                if (   Math.abs(event.clientY - ( parseInt(active.top) + parseInt(this.clickY ) )    ) <= 80   && this.resize == -1  ) {
-                    console.log('test')
-                    if (array_stop_y.length < 1 ){this.stop_movement.push({'type':'y','id':active.id});
+                if (   Math.abs(event.clientY - ( parseInt(active.top) + parseInt(this.clickY ) )    ) <= 80  && this.resize == -1  ) {
+                    if (array_stop_y.length < 1 ){
+                    this.stop_movement.push({'type':'y','id':active.id});
                     active.top = active.top
-                    
-                    
                     }
                 }else{
                     if( this.resize == -1){
                        this.stop_movement = []
-                        array_stop_y = []
                          active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
                     }
                     
@@ -416,13 +413,28 @@ export default {
                
             }else{
                  this.stop_movement = []
-                        array_stop_y = []
  
             }
            if  (na_odn_osi_x_center.length){
                  let all_array = na_odn_osi_x_center.slice()
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
+              
+              
+            if (   Math.abs(event.clientY - (  parseInt(active.top) +  ( parseInt(this.get_size(active.id).height) / 2  )  )    ) <= 80  && this.resize == -1  ) {
+                    if (array_stop_y.length < 1 ){
+                    this.stop_movement.push({'type':'y','id':active.id});
+                    active.top = active.top
+                    console.log(1)
+                    }
+                }else{
+                    if( this.resize == -1){
+                       this.stop_movement = []
+                         active.top  =  parseInt(event.clientY) - parseInt(this.clickY)  + parseInt(document.documentElement.scrollTop) - 64 + 'px';
+                    }
+                    
+                    }
+              
                 let top_line  =    parseInt(active.top) +  ( parseInt(this.get_size(active.id).height) / 2  )  + 'px'
                  let left_line = parseInt(sort_y[0].left) +   ( parseInt(this.get_size(sort_y[0].id).width) / 2  )   + 'px'    
                 let width_line  =   parseInt(this.get_position(sort_y.slice(-1)[0].id).x)   +  ( parseInt(this.get_size(sort_y.slice(-1)[0].id).width) / 2  )  -   parseInt(this.get_position(sort_y[0].id).x)      -  ( parseInt(this.get_size(sort_y[0].id).width) / 2  )      + 'px'

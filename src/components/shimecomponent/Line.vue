@@ -1,5 +1,12 @@
 <template>
-    <div class="line" style="position:absolute;  z-index:9999999" v-bind:style="{height:get_height,left:get_left,top:get_top,width:get_width,backgroundColor:color,transform:'rotate(' +  rotate + ')'}"> </div>
+
+
+
+    <div class="line" style="position:absolute;  z-index:9999999" v-bind:style="{height:get_height,left:get_left,top:get_top,width:get_width,backgroundColor:color,transform:'rotate(' +  rotate + ')'}"> 
+
+          <p   v-if="info_width"    style="position:absolute; top:0%; left:  calc(50% - 10px);">{{ get_width }}</p>
+
+    </div>
 </template>
 
 <script>
@@ -20,8 +27,11 @@ export default {
         get_top(){ return parseInt(this.top) + 'px'},
         get_left(){  return parseInt(this.left) + 'px'},
         get_height(){return parseInt(this.height) + 'px'},  
-        get_width(){return parseInt(this.width) + 'px'}
+        get_width(){return parseInt(this.width) + 'px'},
+    
+        info_width(){return parseInt(this.get_width)  >= 10  }
     }
+
 }
 </script>
 <style scoped>
