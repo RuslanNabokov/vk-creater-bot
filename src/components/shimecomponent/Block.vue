@@ -1,11 +1,11 @@
 <template>
     <div   
-     
+     @contextmenu.prevent="contextmenu()"
     v-bind:id = "'block-' + card.id"
     v-bind:class="{'opacity-overlab-block':card.overlap_opacity}"
     v-on:click.ctrl.exact="addBlockInarraydedicated()"
     class="block-shime  card sticky-action row" 
-    style="display:relative;margin:0px;padding:0px"
+    style="display:relative;margin:0px;padding:0px;"
 
     v-bind:style="{position:position,
     left:card.left,
@@ -80,6 +80,7 @@ export default {
         ],
         position:'relative',
         margin:"0px",
+        extend_menu:[{'1':{'2': 'c'} }],
              
     }),
     mounted(){
@@ -93,7 +94,9 @@ export default {
 
     methods:{
 
-            
+            contextmenu(){
+                this.$parent.$emit('right-click-to-block')
+            },
             isdedicated(){
                 return this.card.dedicated
             },

@@ -1,80 +1,96 @@
 <template>
-    <hsc-menu-style-white>
-        <hsc-menu-context-menu style="margin: 50px;">
-            <div class="box" style="padding: 1em;">
-                Secondary click here
-            </div>
-            <template slot="contextmenu">
-                <hsc-menu-item   label="MenuItem 1" />
-                <hsc-menu-item label="MenuItem 2" />
-                <hsc-menu-item label="MenuItem 2">
-                    <hsc-menu-item label="MenuItem 4" />
-                    <hsc-menu-item label="MenuItem 5" />
-                </hsc-menu-item>
-            </template>
-        </hsc-menu-context-menu>
-        <hsc-menu-context-menu style="margin: 50px;">
-            <div class="box" style="padding: 1em;">
-                outer click here(nested case)
-                <hsc-menu-context-menu style="margin: 50px;" @contextmenu.native.stop>
-                    <div class="box" style="padding: 1em;">
-                        inner click here
-                    </div>
-                    <template slot="contextmenu">
-                        <hsc-menu-item label="MenuItem 6" />
-                        <hsc-menu-item label="MenuItem 7" />
-                        <hsc-menu-item label="MenuItem 8">
-                            <hsc-menu-item label="MenuItem 9" />
-                            <hsc-menu-item label="MenuItem 10" />
-                        </hsc-menu-item>
-                    </template>
-                </hsc-menu-context-menu>
-            </div>
-            <template slot="contextmenu">
-                <hsc-menu-item label="MenuItem 1" />
-                <hsc-menu-item  label="MenuItem 2" />
-                <hsc-menu-item label="MenuItem 2">
-                    <hsc-menu-item label="MenuItem 4" />
-                    <hsc-menu-item label="MenuItem 5" />
-                </hsc-menu-item>
-            </template>
-        </hsc-menu-context-menu>
-        <hsc-menu-button-menu style="margin: 50px;" @open="open" @close="close">
-            <button>Click Here</button>
-            <template slot="contextmenu">
-                <hsc-menu-item label="MenuItem 1" />
-                <hsc-menu-item label="MenuItem 2" />
-                <hsc-menu-item label="MenuItem 2">
-                    <hsc-menu-item label="MenuItem 4" />
-                    <hsc-menu-item label="MenuItem 5" />
-                </hsc-menu-item>
-            </template>
-        </hsc-menu-button-menu>
-    </hsc-menu-style-white>
+  <div>
+    <tree :tree-data="tree"></tree>
+  </div>
 </template>
 
 
-<script lang="ts">
-import Vue from 'vue'
-export default Vue.extend({
-    methods: {
-        open() {
-            console.log('open')
+<script>
+import Tree from './TreeContext.vue'
+
+
+export default {
+ props: {
+ 
+        'viewMenu':{default:true},
+        'top': {default:'200px'},
+        'left':{default: '0px'},
+         'ext_menu':{default:'0px'},
+        'element_context':{default:-1},
+
+    },
+  data:() => ({
+ 
+      tree: {
+      label: "A cool folder",
+      children: [
+        {
+          label: "A cool sub-folder 1",
+          children: [
+            { label: "A cool sub-sub-folder 1" },
+            { label: "A cool sub-sub-folder 2" }
+          ]
         },
-        close() {
-            console.log('close')
-        }
-    }
-})
+        { label: "This one is not that cool" }
+      ]
+    }, 
+    // .push(this.element_context)
+  }),
+  components:{
+    Tree
+  },
+
+  computed:{
+    left_px(){
+      return parseInt(this.left) + 'px'
+    },
+     top_px(){
+      return parseInt(this.top) + 'px'
+    },
+
+  }
+
+}
 </script>
 
+<style scoped>
 
-<style>
-.box {
-  box-shadow: 0 0 4pt rgba(0, 0, 0, 0.25);
-  border-radius: 20pt;
-  background-color: rgba(255, 255, 255, 0.25);
-  user-select: none;
-  cursor: context-menu;
+.center {
+  text-align: center;
 }
+
+#demo {
+    width: 100%;
+    height: 100%;
+ 
+}
+
+#right-click-menu{
+    background: #FAFAFA;
+    border: 1px solid #BDBDBD;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+    display: block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    width: 250px;
+    z-index: 999999;
+}
+
+#right-click-menu li {
+    border-bottom: 1px solid #E0E0E0;
+    margin: 0;
+    padding: 5px 35px;
+}
+
+#right-click-menu li:last-child {
+    border-bottom: none;
+}
+
+#right-click-menu li:hover {
+    background: #1E88E5;
+    color: #FAFAFA;
+}
+
 </style>

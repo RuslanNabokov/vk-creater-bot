@@ -1,8 +1,23 @@
 <template>
-    <div    style="position:absolute;height:100%;width:100%" >
-        <div style="overflow: hidden;"  v-on:mousemove="mouseMove"      class='field'>
-       
-        <!-- @contextmenu="rightclick($event)"  
+    <div     style="position:absolute;height:100%;width:100%" >
+         
+            <div style="overflow: hidden;" ref="field"  v-on:mousemove="mouseMove" @click="hideContextMenu()"   @contextmenu.prevent="showContextMenu()"     class='field'>
+
+      <context-menu 
+      v-bind:viewMenu=opencontextmenu
+      v-bind:top=click_context_y
+      v-bind:left=click_context_x  
+      v-bind:element_context=element_context  
+      v-bind:ext_menu=ext_menu
+      />
+
+        <!-- <div style="overflow: hidden;"  @contextmenu="rightclick($event)"   v-on:mousemove="mouseMove"      class='field'>
+       <vue-simple-context-menu
+    :options="options"
+    ref="vueSimpleContextMenu"
+    @optionClicked="optionClicked">
+    </vue-simple-context-menu> -->
+        <!-- 
             <div v-for="block in objects" :key="block.id" class='drag'
          v-bind:style="{
         position: positionByKey(block.id),
@@ -22,6 +37,7 @@
         <Block v-for="card in cards"  :key="card.id"
          v-bind:card={...card}
          v-bind:dedicated=isdedicated(card.id)
+         
          />
         
         <MLine  v-for="(line,id) in  lines" 
@@ -31,15 +47,16 @@
          v-bind:color=line.color
         />
 
-        <Linetoblock v-for="connect in connections" 
+        <Linetoblock v-if="load" v-for="connect in connections" 
+        type='sd'
         v-bind:x1=cards[connect.card_id].left
         v-bind:y1=cards[connect.card_id].top
         v-bind:x2=cards[connect.to_card_id].left
         v-bind:y2=cards[connect.to_card_id].top
-       
         v-bind:current_pos_x=current_pos_x
          v-bind:current_pos_y=current_pos_y
-         v-bind:peres=calc_peres_card(connect.card_id,connect.to_card_id)
+        v-bind:size_main_block=get_size(connect.card_id)  
+        v-bind:size_second_block=get_size(connect.to_card_id)    
         > </Linetoblock>
 
  
@@ -48,11 +65,13 @@
             v-bind:x2= get_center(get_main_card.id).x
             y1=0
             v-bind:y2=get_main_card.top
+
             v-bind:peres=calc_peres(get_center_window,0,get_center(get_main_card.id).x,get_main_card.top)
+            
          />
         </div>
 
-        
+
     </div>
 
 
@@ -64,10 +83,13 @@
 
 import Block from  '@/components/shimecomponent/Block'
 import MLine from  '@/components/shimecomponent/Line'
-// import ContextMenu from './context/ContextMenu.vue'
+ import ContextMenu from './context/ContextMenu.vue'
 import MainMenu from './context/MainMenu.vue'
 import Linetoblock from  '@/components/shimecomponent/LinetoBlock'
 import LinetoBlock from './shimecomponent/LinetoBlock.vue'
+
+  
+  
 
 
 const AXIS_ERR = 1
@@ -85,7 +107,15 @@ export default {
     current_pos_x:0,
     current_pos_y:0,
     stop_movement:[],
-    connections: new Array({card_id:1,to_card_id:2,type:'common_line',height:200 }),
+    opencontextmenu:false,
+    click_context_x:0,
+    click_context_y:0,
+    element_context:0,
+    ext_menu:[],
+
+    connections: new Array({card_id:1,to_card_id:2,type:'' }),
+
+
 
   
     cards:[
@@ -99,11 +129,15 @@ export default {
                 MLine,
                 Linetoblock,
                 MainMenu,
-        LinetoBlock},
+                LinetoBlock,
+                ContextMenu
+                },
     mounted(){
 
         this.load = true
 
+
+          
         this.$on('addBlockInarraydedicated',(card_id)=>{
             let index_ = this.dedicated.indexOf(card_id)
             if (index_ == -1){
@@ -117,7 +151,7 @@ export default {
             this.dragged = id
             this.clickX = x,
             this.clickY = y
-          
+        
             document.getElementById(`block-${id}`).style.zIndex = "9999"
          }), 
         this.$on('resize',function(id,x,y){
@@ -133,6 +167,12 @@ export default {
         if (active_){
         active_.overlap_opacity = false
         }
+
+        this.$on('right-click-to-block',function(ext_menu,blockid){
+        
+            this.showContextMenu(blockid,ext_menu)
+
+        }),
         
        this.resize = -1;
         this.dragged = -1;
@@ -177,8 +217,45 @@ export default {
 
     
     methods:{
+
+    optionClicked (event) {
+    window.alert(JSON.stringify(event))
+},
+
+
+    hideContextMenu(event){
+   this.opencontextmenu = false
+       
+    },
+    showContextMenu(element,ext_menu){
+
+            this.opencontextmenu = true
+            this.click_context_x =  this.current_pos_x  + parseInt(document.body.scrollLeft ) + parseInt(document.documentElement.scrollLeft) 
+            this.click_context_y = parseInt(this.current_pos_y - 40)  + parseInt(document.body.scrollTop) + parseInt(document.documentElement.scrollTop)
+            this.element_context = element || 0
+            this.ext_menu = ext_menu || 0 
+           
+    },
+
     
- 
+    addPoint(blockid){
+        let block = document.getElementById(blockid)
+        jsPlumb.makeTarget(blockid, endpointOptions);
+    },
+
+    addConnect(source,target){
+     let block =  document.getElementById(source)
+     let block2 = document.getElementById(target)
+        jsPlumb.connect({
+            source:block,
+            target:block2
+        }    
+        )},
+
+     update_lines(){
+            jsPlumb.setSuspendDrawing(false, true);
+
+     },
 
       updateWidth() {
         this.window_width = window.innerWidth;
@@ -186,24 +263,23 @@ export default {
     
 
     rightclick(event){ 
-        console.log(event)
+
          event.preventDefault();
     },
 
-    showContextMenu(){
 
-    },
+
 
     isdedicated(id){
         return  this.dedicated.indexOf(id) != -1
     },
 
-
+    
     calc_peres(x1,y1,x2,y2){
         let k = (parseFloat(y1) - parseFloat(y2))  / (parseFloat(x1) - parseFloat(x2) );
         let b =   parseFloat(y2)  - (parseFloat(k) * parseFloat(x2));
         let pred_y =  Math.abs(parseFloat(k) * parseFloat(this.current_pos_x) +  parseFloat(b));  
-        return   (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  >= -10 && (pred_y + 53) - Math.abs(parseFloat(this.current_pos_y))  <= 10
+        return   (pred_y ) - Math.abs(parseFloat(this.current_pos_y))  >= -10 && (pred_y ) - Math.abs(parseFloat(this.current_pos_y))  <= 10
     },
     calc_peres_card(card_id,to_card_id ){
         let x1=this.cards[card_id].left
@@ -270,6 +346,7 @@ export default {
 // offsetY: 485
 // pageX: 865
 // pageY: 548
+this.update_lines()
             this.current_pos_x = event.clientX
             this.current_pos_y = event.clientY
             if(this.resize != -1){ 
@@ -420,12 +497,11 @@ export default {
                all_array.push(active)
                let sort_y =  all_array.sort((a,b)=>{  if (parseInt(a.left) <  parseInt(b.left) ){return -1}else if (parseInt(a.left) >  parseInt(b.left)) {return 1 }else{return 0}     })
               
-              
-            if (   Math.abs(event.clientY - (  parseInt(active.top) +  ( parseInt(this.get_size(active.id).height) / 2  )  )    ) <= 80  && this.resize == -1  ) {
+               
+            if (  Math.abs(event.clientY - (  parseInt(active.top) + 20  ))   <= 110  && this.resize == -1  ) {
                     if (array_stop_y.length < 1 ){
                     this.stop_movement.push({'type':'y','id':active.id});
                     active.top = active.top
-                    console.log(1)
                     }
                 }else{
                     if( this.resize == -1){
