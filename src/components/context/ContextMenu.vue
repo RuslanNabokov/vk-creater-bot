@@ -1,7 +1,20 @@
 <template>
-  <div>
-    <tree :tree-data="tree"></tree>
-  </div>
+<div class='context' v-if="viewMenu"   v-bind:style="{left:left_px,top:top_px }">
+
+ <ul id="right-click-menu" tabindex="-1"  >
+   <li v-for="(node,index)  in tree">  
+      <div  v-bind:class="{ selected: selected(index) }"      @mouseover="MouseOn(index)"  :id=index>
+        {{ node.label }}
+        </div >
+          <ul  class="right-click-menu"     v-if="node.children && node.children.length">
+      <Tree  v-bind:select_=select  v-for="(child,index_ch ) in node.children" :node="child" :parent_id=index :id_item=index_ch ></Tree>
+    </ul>
+     
+       </li>
+
+ 
+    </ul>
+</div>
 </template>
 
 
@@ -12,35 +25,44 @@ import Tree from './TreeContext.vue'
 export default {
  props: {
  
-        'viewMenu':{default:true},
+        'viewMenu':{default:false},
         'top': {default:'200px'},
         'left':{default: '0px'},
          'ext_menu':{default:'0px'},
         'element_context':{default:-1},
 
     },
+  mounted(){
+      this.$on('select_el',(id)=>{
+                this.select = id
+              
+         })
+            },
+    
   data:() => ({
- 
-      tree: {
-      label: "A cool folder",
-      children: [
-        {
-          label: "A cool sub-folder 1",
-          children: [
-            { label: "A cool sub-sub-folder 1" },
-            { label: "A cool sub-sub-folder 2" }
-          ]
-        },
-        { label: "This one is not that cool" }
-      ]
-    }, 
+      tree: [
+        {label:'1',children:[{label:'1.1'}],children:[    {label:'2',children:[{label:'2.1'}]}    ]   },
+        {label:'2',children:[{label:'2.1'}]}
+      
+      ],
+      select:'0.0' 
     // .push(this.element_context)
   }),
   components:{
     Tree
   },
-
+  methods:{
+    MouseOn(index){
+          this.select = index 
+          
+    },
+   selected(index){
+        
+      return   String(this.select).split('.').length < 2 &&  parseInt(this.select) == parseInt(index)  
+    },
+  },
   computed:{
+
     left_px(){
       return parseInt(this.left) + 'px'
     },
@@ -48,23 +70,19 @@ export default {
       return parseInt(this.top) + 'px'
     },
 
+
   }
 
 }
 </script>
 
 <style scoped>
-
-.center {
-  text-align: center;
+  .selected{
+  background-color:greenyellow;
 }
-
-#demo {
-    width: 100%;
-    height: 100%;
- 
+.context{
+  position: absolute;
 }
-
 #right-click-menu{
     background: #FAFAFA;
     border: 1px solid #BDBDBD;
@@ -73,24 +91,13 @@ export default {
     list-style: none;
     margin: 0;
     padding: 0;
-    position: absolute;
-    width: 250px;
+   
+    width: min-content ;
     z-index: 999999;
+    font-size: 10px;
+
 }
 
-#right-click-menu li {
-    border-bottom: 1px solid #E0E0E0;
-    margin: 0;
-    padding: 5px 35px;
-}
 
-#right-click-menu li:last-child {
-    border-bottom: none;
-}
-
-#right-click-menu li:hover {
-    background: #1E88E5;
-    color: #FAFAFA;
-}
 
 </style>

@@ -95,7 +95,7 @@ export default {
     methods:{
 
             contextmenu(){
-                this.$parent.$emit('right-click-to-block')
+                this.$parent.$emit('right-click-to-block',[{'name':'name'}])
             },
             isdedicated(){
                 return this.card.dedicated
