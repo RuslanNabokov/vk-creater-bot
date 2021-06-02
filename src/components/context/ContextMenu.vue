@@ -2,8 +2,8 @@
 <div class='context' v-if="viewMenu"   v-bind:style="{left:left_px,top:top_px }">
 
  <ul id="right-click-menu" tabindex="-1"  >
-   <li v-for="(node,index)  in tree">  
-      <div  v-bind:class="{ selected: selected(index) }"      @mouseover="MouseOn(index)"  :id=index>
+   <li v-for="(node,index)  in full_tree">  
+      <div  v-on:click="action_click(1)"    v-bind:class="{ selected: selected(index) }"      @mouseover="MouseOn(index)"  :id=index>
         {{ node.label }}
         </div >
           <ul  class="right-click-menu"     v-if="node.children && node.children.length">
@@ -28,24 +28,27 @@ export default {
         'viewMenu':{default:false},
         'top': {default:'200px'},
         'left':{default: '0px'},
-         'ext_menu':{default:'0px'},
+         'ext_menu':{default:()=>{return {}}},
         'element_context':{default:-1},
+
 
     },
   mounted(){
       this.$on('select_el',(id)=>{
                 this.select = id
               
-         })
+         }),
+         this.$on('click',(node)=>{
+            this.click_to_context(node.exec)
+          } )
             },
     
   data:() => ({
       tree: [
-        {label:'1',children:[{label:'1.1'}],children:[    {label:'2',children:[{label:'2.1'}]}    ]   },
-        {label:'2',children:[{label:'2.1'}]}
       
       ],
-      select:'0.0' 
+    select:-1, 
+      
     // .push(this.element_context)
   }),
   components:{
@@ -60,6 +63,12 @@ export default {
         
       return   String(this.select).split('.').length < 2 &&  parseInt(this.select) == parseInt(index)  
     },
+    action_click(index){
+
+    },
+    click_to_context(exec){
+          this.$parent.$emit('exec_context',exec)
+    }
   },
   computed:{
 
@@ -70,6 +79,10 @@ export default {
       return parseInt(this.top) + 'px'
     },
 
+    full_tree(){
+      
+      return this.tree.concat(this.ext_menu)
+    }
 
   }
 
@@ -82,6 +95,7 @@ export default {
 }
 .context{
   position: absolute;
+  z-index: 999;
 }
 #right-click-menu{
     background: #FAFAFA;
@@ -91,9 +105,9 @@ export default {
     list-style: none;
     margin: 0;
     padding: 0;
+
    
     width: min-content ;
-    z-index: 999999;
     font-size: 10px;
 
 }

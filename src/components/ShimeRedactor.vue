@@ -1,7 +1,7 @@
 <template>
     <div     style="position:absolute;height:100%;width:100%" >
          
-            <div style="overflow: hidden;" ref="field"  v-on:mousemove="mouseMove" @click="hideContextMenu()"   @contextmenu.prevent="showContextMenu()"     class='field'>
+            <div style="overflow: hidden;" ref="field"  v-on:mousemove="mouseMove" @click="hideContextMenu()"  @contextmenu.self="mainContextMenu()"     @contextmenu.prevent="showContextMenu()"     class='field'>
 
       <context-menu 
       v-bind:viewMenu=opencontextmenu
@@ -159,6 +159,10 @@ export default {
         // document.getElementById(`block-${id}`).style.zIndex = "9999"
         // let active = this.cards[this.cards.findIndex( card => card.id === this.resize ) ]
         }), 
+           this.$on('exec_context', function(exec) { 
+             console.log( eval( 'this.element_context.' + exec + '()' )   )   
+               
+         }), 
         
 
 
@@ -168,9 +172,11 @@ export default {
         active_.overlap_opacity = false
         }
 
-        this.$on('right-click-to-block',function(ext_menu,blockid){
-        
-            this.showContextMenu(blockid,ext_menu)
+        this.$on('right-click-to-block',function(ext_menu,card){
+       
+            this.ext_menu = ext_menu
+            this.element_context = card 
+            this.showContextMenu()
 
         }),
         
@@ -225,15 +231,25 @@ export default {
 
     hideContextMenu(event){
    this.opencontextmenu = false
-       
-    },
-    showContextMenu(element,ext_menu){
+this.element_context = []
 
+    },
+    
+
+mainContextMenu(){
+     this.element_context = []
+     this.ext_menu =  []
+     this.showContextMenu()
+},
+ 
+    showContextMenu(ext_menu,type){
+       
             this.opencontextmenu = true
             this.click_context_x =  this.current_pos_x  + parseInt(document.body.scrollLeft ) + parseInt(document.documentElement.scrollLeft) 
             this.click_context_y = parseInt(this.current_pos_y - 40)  + parseInt(document.body.scrollTop) + parseInt(document.documentElement.scrollTop)
-            this.element_context = element || 0
-            this.ext_menu = ext_menu || 0 
+            
+
+            
            
     },
 

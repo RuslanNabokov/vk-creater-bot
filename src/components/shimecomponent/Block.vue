@@ -80,7 +80,7 @@ export default {
         ],
         position:'relative',
         margin:"0px",
-        extend_menu:[{'1':{'2': 'c'} }],
+        extend_menu:[{'label':'name','children':[{'label':'1','exec':'ale'}]   }],
              
     }),
     mounted(){
@@ -94,14 +94,16 @@ export default {
 
     methods:{
 
-            contextmenu(){
-                this.$parent.$emit('right-click-to-block',[{'name':'name'}])
+            contextmenu(){ 
+
+              
+                this.$parent.$emit('right-click-to-block',this.extend_menu,this )
             },
             isdedicated(){
                 return this.card.dedicated
             },
             clickRound(id){
-                console.log(id)
+               
                 return false
             },
 
@@ -137,6 +139,9 @@ export default {
              this.$parent.$emit('stopdrag', this.card.id);
              this.position = 'absolute'
              
+            },
+            ale(){ 
+                
             }
     }
 }

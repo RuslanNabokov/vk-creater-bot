@@ -1,10 +1,10 @@
 <template>
 
-  <li class='node' >
-    <div v-bind:id="get_id()"  v-bind:class="{ selected: selected }"   @mouseover.stop="MouseOn()" @mouseleave="mouseleave" >{{ node.label }}</div>
+  <li class='node' > 
+    <div v-bind:id="get_id()"  v-bind:class="{ selected: selected }"  v-on:click="action_click(node.index)"  @mouseover.stop="MouseOn()" @mouseleave="mouseleave" >{{ node.label }}</div>
 
     <ul  class="right-click-menu"     v-if="node.children && node.children.length">
-      <node   v-for="(child,index ) in node.children" :node="child"  :select_=select_  :parent_id="get_id()" :id_item="index" ></node>
+      <node    v-for="(child,index ) in node.children" :node="child"  :select_=select_  :parent_id="get_id()" :id_item="index" ></node>
     </ul>
     </li>
    
@@ -27,7 +27,10 @@ export default {
   mounted(){
         this.$on('select_el',(id)=>{
                 this.$parent.$emit('select_el', id) 
-         })
+         }),
+           this.$on('click',(node)=>{
+              this.$parent.$emit('click', node) 
+          } )
   },
 
   methods:{
@@ -45,13 +48,16 @@ export default {
     },
     mouseleave(){
 
+     },
+     action_click(event){ 
+         
+        this.$parent.$emit('click',this.node)
      }
 
   },
   computed:{
     selected(){
-      console.log(  String(this.select_) + 'select')
-      console.log(String(this.get_id()) + 'id' )
+
       return  String(this.select_) == String(this.get_id()) 
     }
   }
